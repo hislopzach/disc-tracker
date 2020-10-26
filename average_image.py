@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from sys import argv
+# given a video, will create an image file containing the 'average frame'
 
 cap = cv.VideoCapture(argv[1])
 totalFrames = cap.get(cv.CAP_PROP_FRAME_COUNT)

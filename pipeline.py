@@ -44,24 +44,30 @@ def show_removed_background(video_filename, background_image):
                 start_overlay = True
         if ret:
             if start_overlay:
-                gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY).astype("uint8")
-                abs_diff = cv.absdiff(gray, background_image).astype("uint8")
-                ret2, otsu_thresh = cv.threshold(abs_diff, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
-                mask = otsu_thresh
-                kernel = np.ones((3, 3), np.uint8)
-                mask = cv.erode(otsu_thresh, kernel, iterations=1)
-                mask = cv.dilate(otsu_thresh, kernel, iterations=1)
-
-                resized_mask = cv.resize(mask, (videoWidth, videoHeight), cv.INTER_LANCZOS4)
-                summed_mask += resized_mask
-
-                color_converted = cv.cvtColor(resized_mask, cv.COLOR_GRAY2RGB).astype("uint8")
-                summed_img += color_converted
-                result_frame = add_overlay(frame, summed_mask, 0.8)
+                result_frame, summed_mask = highlight_movement(frame, background_image, summed_mask)
             else:
                 result_frame = frame
             cv.imshow("result frame", result_frame)
             cv.waitKey(5)
+
+
+def highlight_movement(frame, background_image, summed_mask):
+    video_width = frame.shape[1]
+    video_height = frame.shape[0]
+    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY).astype("uint8")
+    abs_diff = cv.absdiff(gray, background_image).astype("uint8")
+    ret2, otsu_thresh = cv.threshold(abs_diff, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+    mask = otsu_thresh
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv.erode(otsu_thresh, kernel, iterations=1)
+    mask = cv.dilate(otsu_thresh, kernel, iterations=1)
+
+    resized_mask = cv.resize(mask, (video_width, video_height), cv.INTER_LANCZOS4)
+    summed_mask += resized_mask
+
+    color_converted = cv.cvtColor(resized_mask, cv.COLOR_GRAY2RGB).astype("uint8")
+    result_frame = add_overlay(frame, summed_mask, 0.8)
+    return result_frame, summed_mask
 
 
 def add_overlay(frame, mask, alpha):

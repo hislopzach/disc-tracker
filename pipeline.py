@@ -51,11 +51,14 @@ def show_removed_background(video_filename, background_image):
             cv.waitKey(5)
 
 
-def show_knn_removed_background(video_filename):
+def show_knn_removed_background(video_filename, save=False):
     cap = cv.VideoCapture(video_filename)
     videoWidth = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
     videoHeight = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     frame_rate = cap.get(5)
+    # setup video writer
+    fourcc = cv.VideoWriter_fourcc(*"MJPG")
+    out = cv.VideoWriter("output.avi", fourcc, frame_rate, (videoWidth, videoHeight), 1)
 
     back_sub = cv.createBackgroundSubtractorKNN()
     summed_mask = np.zeros((videoHeight, videoWidth)).astype("uint8")
@@ -74,16 +77,20 @@ def show_knn_removed_background(video_filename):
             fgMask = back_sub.apply(frame)
             if start_overlay:
                 # eroded_mask = erode_and_dilate(fgMask, (5, 5))
-                cleaned_mask = remove_small_components(fgMask, 20)
-                cleaned_mask = remove_large_components(cleaned_mask, 1000)
-                # cleaned_mask = keep_medium_components(fgMask)
-                # isolated_mask = remove_lone_pixels(eroded_mask)
+                # cleaned_mask = remove_small_components(fgMask, 20)
+                # cleaned_mask = remove_large_components(cleaned_mask, 1200)
+                cleaned_mask = keep_medium_components(fgMask, 20, 1200)
+                # cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
                 summed_mask += cleaned_mask
-                result_frame = add_overlay(frame, summed_mask, 0.8)
+                result_frame = add_overlay(frame, summed_mask)
             else:
                 result_frame = frame
             cv.imshow("result frame", result_frame)
             cv.waitKey(5)
+            if save:
+                out.write(result_frame)
+    cap.release()
+    out.release()
 
 
 def remove_lone_pixels(image):
@@ -125,14 +132,14 @@ def remove_large_components(image, max_size=150):
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(image, connectivity=8)
     # connectedComponentswithStats yields every seperated component with information on each of them, such as size
     # the following part is just taking out the background which is also considered a component, but most of the time we don't want that.
-    sizes = stats[1:, -1]
+    sizes = stats[1:]
     nb_components = nb_components - 1
 
     # your answer image
     result = np.zeros((output.shape))
     # for every component in the image, you keep it only if it's above min_size
     for i in range(0, nb_components):
-        if sizes[i] <= max_size:
+        if sizes[i][-1] <= max_size and sizes[i][-2] <= 200:
             result[output == i + 1] = 255
 
     return result.astype("uint8")
@@ -175,9 +182,9 @@ def highlight_movement(frame, background_image, summed_mask):
     return result_frame, summed_mask
 
 
-def add_overlay(frame, mask, alpha):
+def add_overlay(frame, mask, color=(0, 0, 255), alpha=0.8):
     colored_overlay = np.zeros(frame.shape, frame.dtype)
-    colored_overlay[:, :] = (0, 0, 255)
+    colored_overlay[:, :] = color
     colored_overlay = cv.bitwise_and(colored_overlay, colored_overlay, mask=mask)
     res = frame.copy()
     beta = 1 - alpha
@@ -197,7 +204,9 @@ def main():
     # background_image = get_background_image(video_filename)
 
     # show_removed_background(video_filename, background_image)
-    show_knn_removed_background(video_filename)
+    prompt = input("save video?")
+    save_video = "y" in prompt
+    show_knn_removed_background(video_filename, save_video)
 
 
 if __name__ == "__main__":

@@ -111,7 +111,9 @@ def remove_lone_pixels(image):
 
 def remove_small_components(image, min_size=25):
     # find all your connected components (white blobs in your image)
-    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(image, connectivity=8)
+    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(
+        image, connectivity=8
+    )
     # connectedComponentswithStats yields every seperated component with information on each of them, such as size
     # the following part is just taking out the background which is also considered a component, but most of the time we don't want that.
     sizes = stats[1:, -1]
@@ -129,7 +131,9 @@ def remove_small_components(image, min_size=25):
 
 def remove_large_components(image, max_size=150):
     # find all your connected components (white blobs in your image)
-    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(image, connectivity=8)
+    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(
+        image, connectivity=8
+    )
     # connectedComponentswithStats yields every seperated component with information on each of them, such as size
     # the following part is just taking out the background which is also considered a component, but most of the time we don't want that.
     sizes = stats[1:]
@@ -147,7 +151,9 @@ def remove_large_components(image, max_size=150):
 
 def keep_medium_components(image, min_size=25, max_size=500):
     # find all your connected components (white blobs in your image)
-    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(image, connectivity=8)
+    nb_components, output, stats, centroids = cv.connectedComponentsWithStats(
+        image, connectivity=8
+    )
     # connectedComponentswithStats yields every seperated component with information on each of them, such as size
     # the following part is just taking out the background which is also considered a component, but most of the time we don't want that.
     sizes = stats[1:, -1]
@@ -186,10 +192,22 @@ def add_overlay(frame, mask, color=(0, 0, 255), alpha=0.8):
     colored_overlay = np.zeros(frame.shape, frame.dtype)
     colored_overlay[:, :] = color
     colored_overlay = cv.bitwise_and(colored_overlay, colored_overlay, mask=mask)
-    res = frame.copy()
-    beta = 1 - alpha
-    cv.addWeighted(colored_overlay, alpha, res, beta, 0, res)
+    # make mask transparent to avoid darkening image
+    transparent_overlay = make_overlay_transparent(colored_overlay, mask)
+
+    # convert to BRGA to add transparent overlay
+    frame_alpha = cv.cvtColor(frame.copy(), cv.COLOR_BGR2BGRA)
+    res = cv.add(frame_alpha, transparent_overlay)
+    # convert back bgr
+    res = cv.cvtColor(res, cv.COLOR_BGRA2BGR)
     return res
+
+
+def make_overlay_transparent(colored_overlay, mask):
+    rgba = cv.cvtColor(colored_overlay, cv.COLOR_BGR2BGRA)
+    print(mask)
+    rgba[:, :, 3] = mask
+    return rgba
 
 
 def erode_and_dilate(img, kernel=(3, 3)):

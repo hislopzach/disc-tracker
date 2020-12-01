@@ -1,2 +1,6 @@
 venv
 videos/*
+outputs/*
+images/*
+*.avi
+.vscode/launch.json

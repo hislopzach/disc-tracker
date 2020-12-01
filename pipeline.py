@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import sys
+from pathlib import Path
 
 
 def get_background_image(video_filename):
@@ -57,8 +58,11 @@ def show_knn_removed_background(video_filename, save=False):
     videoHeight = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     frame_rate = cap.get(5)
     # setup video writer
+    output_filename = f"outputs/{Path(video_filename).stem}.avi"
     fourcc = cv.VideoWriter_fourcc(*"MJPG")
-    out = cv.VideoWriter("output.avi", fourcc, frame_rate, (videoWidth, videoHeight), 1)
+    out = cv.VideoWriter(
+        output_filename, fourcc, frame_rate, (videoWidth, videoHeight), 1
+    )
 
     back_sub = cv.createBackgroundSubtractorKNN()
     summed_mask = np.zeros((videoHeight, videoWidth)).astype("uint8")

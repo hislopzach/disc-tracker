@@ -17,7 +17,7 @@ def show_knn_removed_background(video_filename, save=False):
     out = cv.VideoWriter(
         output_filename, fourcc, frame_rate, (videoWidth, videoHeight), 1
     )
-    pts = collections.deque(maxlen=64)
+    pts = collections.deque(maxlen=10000)
     back_sub = cv.createBackgroundSubtractorMOG2()
     summed_mask = np.zeros((videoHeight, videoWidth)).astype("uint8")
     totalFrames = cap.get(cv.CAP_PROP_FRAME_COUNT)

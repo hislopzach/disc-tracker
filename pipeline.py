@@ -80,12 +80,17 @@ def show_knn_removed_background(video_filename, save=False):
         if ret:
             fgMask = back_sub.apply(frame)
             if start_overlay:
+                cleaned_mask = fgMask
                 # eroded_mask = erode_and_dilate(fgMask, (5, 5))
-                cleaned_mask = remove_small_components(fgMask, 20)
-                cleaned_mask = remove_large_components(cleaned_mask, 1200)
-                # cleaned_mask = remove_lone_pixels(cleaned_mask)
-                # cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
+                cleaned_mask = remove_lone_pixels(cleaned_mask)
+                cleaned_mask = remove_small_components(cleaned_mask, 15)
+                cleaned_mask = remove_large_components(cleaned_mask, 700)
+                # cleaned_mask = cv.GaussianBlur(cleaned_mask, (3, 3), 0)
+                cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
+
                 summed_mask += cleaned_mask
+                if i % 3 == 0:
+                    summed_mask = remove_large_components(summed_mask, 9000)
                 result_frame = add_overlay(frame, summed_mask)
             else:
                 result_frame = frame

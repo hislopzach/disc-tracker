@@ -41,6 +41,7 @@ def show_knn_removed_background(video_filename, save=False):
             fgMask = back_sub.apply(inverted_frame)
             if start_overlay:
                 cleaned_mask = clean_mask(fgMask)
+
                 ok, bbox = tracker.update(cleaned_mask)
                 if ok:
                     pts.appendleft(
@@ -48,7 +49,8 @@ def show_knn_removed_background(video_filename, save=False):
                     )
                     p1 = (int(bbox[0]), int(bbox[1]))
                     p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                    # cv.rectangle(frame, p1, p2, (0, 255, 0), 2, 1)
+                    frame = showDistance(bbox, cleaned_mask, frame)
+                    cv.rectangle(frame, p1, p2, (0, 255, 0), 2, 1)
                 result_frame = frame
             else:
                 result_frame = frame
@@ -69,6 +71,18 @@ def show_knn_removed_background(video_filename, save=False):
                 out.write(result_frame)
     cap.release()
     out.release()
+
+def showDistance(bbox, cleaned_mask, frame):
+    lowerb = int(bbox[0])
+    upperb = int(bbox[0] + bbox[2])
+    leftb = int(bbox[1])
+    rightb = int(bbox[1] + bbox[3])
+    cleaned_mask = np.where(cleaned_mask > 254, 1, 0)
+    total = int(np.sum(cleaned_mask[lowerb:upperb, leftb:rightb]))
+    dist = -6 * total + 1400
+    font = cv.FONT_HERSHEY_SIMPLEX
+    cv.putText(frame, str(dist), (lowerb, leftb), font, 1, (255, 255, 255), 1, cv.LINE_AA)
+    return frame
 
 def clean_mask(mask):
     cleaned_mask = remove_lone_pixels(mask)

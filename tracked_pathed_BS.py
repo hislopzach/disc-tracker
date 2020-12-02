@@ -17,7 +17,7 @@ def show_knn_removed_background(video_filename, save=False):
     out = cv.VideoWriter(
         output_filename, fourcc, frame_rate, (videoWidth, videoHeight), 1
     )
-    pts = collections.deque(maxlen=64)
+    pts = collections.deque(maxlen=10000)
     back_sub = cv.createBackgroundSubtractorMOG2()
     summed_mask = np.zeros((videoHeight, videoWidth)).astype("uint8")
     totalFrames = cap.get(cv.CAP_PROP_FRAME_COUNT)
@@ -26,53 +26,42 @@ def show_knn_removed_background(video_filename, save=False):
     for i in range(int(totalFrames)):
         # Capture frame-by-frame
         ret, frame = cap.read()
-        frame= cv.bitwise_not(frame)
-        #frame[frame >= 128]= 255
-        #frame[frame < 128] = 0
+        inverted_frame = cv.bitwise_not(frame)
         if not start_overlay:
             cv.imshow("frame", frame)
             key = cv.waitKey()
             if key == ord("a"):
                 start_overlay = True
-                bbox = cv.selectROI('Tracker', frame)
-                cleaned_mask = fgMask
-                cleaned_mask = remove_lone_pixels(cleaned_mask)
-                cleaned_mask = remove_small_components(cleaned_mask, 15)
-                cleaned_mask = remove_large_components(cleaned_mask, 700)
-                # cleaned_mask = cv.GaussianBlur(cleaned_mask, (3, 3), 0)
-                cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
+                bbox = cv.selectROI("Tracker", frame)
+                fgMask = back_sub.apply(inverted_frame)
+                cleaned_mask = clean_mask(fgMask)
                 tracker.init(cleaned_mask, bbox)
+                cv.destroyWindow("frame")
         if ret:
-            fgMask = back_sub.apply(frame)
+            fgMask = back_sub.apply(inverted_frame)
             if start_overlay:
-                cleaned_mask = fgMask
-                cleaned_mask = remove_lone_pixels(cleaned_mask)
-                cleaned_mask = remove_small_components(cleaned_mask, 15)
-                cleaned_mask = remove_large_components(cleaned_mask, 700)
-                # cleaned_mask = cv.GaussianBlur(cleaned_mask, (3, 3), 0)
-                cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
-
-                #summed_mask += cleaned_mask
-                #if i % 3 == 0:
-                    #summed_mask = remove_large_components(summed_mask, 9000)
-                #cleaned_mask=remove_large_components(cleaned__mask, 9000)
+                cleaned_mask = clean_mask(fgMask)
                 ok, bbox = tracker.update(cleaned_mask)
                 if ok:
-                    pts.appendleft((int(bbox[0] + bbox[2]/2), int(bbox[1] + bbox[3]/2)))
+                    pts.appendleft(
+                        (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
+                    )
                     p1 = (int(bbox[0]), int(bbox[1]))
                     p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                    cv.rectangle(frame, p1, p2, (0, 255, 0), 2, 1)
-                for x in range(1, len(pts)):
-                    # if either of the tracked points are None, ignore
-                    # them
-                    if pts[x - 1] is None or pts[x] is None:
-                        continue
-                    # otherwise, compute the thickness of the line and
-                    # draw the connecting lines
-                    thickness = 3
-                    cv.line(frame, pts[x - 1], pts[x], (0, 0, 255), thickness)
+                    # cv.rectangle(frame, p1, p2, (0, 255, 0), 2, 1)
                 result_frame = frame
             else:
+                result_frame = frame
+            cv.destroyWindow("Tracker")
+            for x in range(1, len(pts)):
+                # if either of the tracked points are None, ignore
+                # them
+                if pts[x - 1] is None or pts[x] is None:
+                    continue
+                # otherwise, compute the thickness of the line and
+                # draw the connecting lines
+                thickness = 3
+                cv.line(frame, pts[x - 1], pts[x], (0, 0, 255), thickness)
                 result_frame = frame
             cv.imshow("result frame", result_frame)
             cv.waitKey(1)
@@ -80,6 +69,14 @@ def show_knn_removed_background(video_filename, save=False):
                 out.write(result_frame)
     cap.release()
     out.release()
+
+def clean_mask(mask):
+    cleaned_mask = remove_lone_pixels(mask)
+    cleaned_mask = remove_small_components(cleaned_mask, 15)
+    # cleaned_mask = remove_large_components(cleaned_mask, 1200)
+    # cleaned_mask = cv.GaussianBlur(cleaned_mask, (3, 3), 0)
+    cleaned_mask = erode_and_dilate(cleaned_mask, (5, 5))
+    return cleaned_mask
 
 
 def remove_lone_pixels(image):

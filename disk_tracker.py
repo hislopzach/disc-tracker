@@ -59,8 +59,10 @@ class DiskTracker:
         self.tracker.init(cleaned_mask, bbox)
         cv.destroyWindow("Tracker")
 
-        result_frame = self.process_frame(frame)
-        return result_frame
+    def update_background(self, frame):
+        inverted_frame = cv.bitwise_not(frame)
+        fg_mask = self.back_sub.apply(inverted_frame)
+        return fg_mask
 
     def process_frame(self, frame):
         if not self.overlay_started:

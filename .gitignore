@@ -3,4 +3,4 @@ videos/*
 outputs/*
 images/*
 *.avi
-.vscode/launch.json
+.vscode/

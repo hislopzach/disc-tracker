@@ -32,6 +32,11 @@ class DiskTracker:
 
         self.overlay_started = False
 
+    def cleanup(self):
+        self.in_video.release()
+        self.out_video.release()
+        cv.destroyAllWindows()
+
     def get_frame(self):
         ret, frame = self.cap.read()
         if not ret:

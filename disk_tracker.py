@@ -65,30 +65,23 @@ class DiskTracker:
         return fg_mask
 
     def process_frame(self, frame):
-        if not self.overlay_started:
-            return frame
-        frame = frame.copy()
-        inverted_frame = cv.bitwise_not(frame)
-        fg_mask = self.back_sub.apply(inverted_frame)
+        result_frame = frame.copy()
+        fg_mask = self.update_background(result_frame)
         cleaned_mask = clean_mask(fg_mask)
-
         ok, bbox = self.tracker.update(cleaned_mask)
         if ok:
+            # add center of bounding box to points list
             self.pts.appendleft(
                 (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
             )
-            p1 = (int(bbox[0]), int(bbox[1]))
-            p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-            # frame = showDistance(bbox, cleaned_mask, frame)
-            cv.rectangle(frame, p1, p2, (0, 255, 0), 2, 1)
 
         for x in range(1, len(self.pts)):
             # if either of the tracked points are None, ignore
             # them
             if self.pts[x - 1] is None or self.pts[x] is None:
                 continue
-            # otherwise, draw the connecting lines
+            # otherwise, draw a line between the last point and the current point
             thickness = 3
-            cv.line(frame, self.pts[x - 1], self.pts[x], (0, 0, 255), thickness)
+            cv.line(result_frame, self.pts[x - 1], self.pts[x], (0, 0, 255), thickness)
 
-        return frame
+        return result_frame

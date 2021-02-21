@@ -2,7 +2,7 @@
 
 Make your own Follow Flights! This project uses OpenCV to trace the location of a disc through its flight path.
 
-### Installation
+## Installation
 
 1. Clone this repo
 2. Create virtual environment and install dependencies
@@ -13,7 +13,7 @@ Make your own Follow Flights! This project uses OpenCV to trace the location of 
   $ pip install -r requirements.txt
 ```
 
-### Usage:
+## Usage:
 
 1. Run program with desired video as command line argument
 
@@ -31,6 +31,6 @@ Disc Tracker only works on static videos taken with a tripod (no panning or zoom
 This software may be lose track of the disc if the background is bright (i.e. the disc's path crosses the sun) or is similar in color to the disc (i.e. blue disc against blue sky).
 The disc may also be lost if its flight carries it too far from the camera.
 
-### Credit
+## Credit
 
 The project was developed by Zachary Hislop, Lance Litten, and Nick Schnorr for CPE 428 (Intro to Computer Vision) at Cal Poly, San Luis Obispo

@@ -1,4 +1,4 @@
-# Disk Tracker
+# Disc Tracker
 
 Make your own Follow Flights!
 
@@ -25,15 +25,15 @@ static video (no zoom or pan)
 $ python main.py video_name.mp4
 ```
 
-2. Press spacebar to move through video frame by frame, until the disk just leaves the throwers hand
-3. Press 'a' key, then use your mouse to draw a rectangle around the disk
+2. Press spacebar to move through video frame by frame, until the disc just leaves the throwers hand
+3. Press 'a' key, then use your mouse to draw a rectangle around the disc
 4. Press spacebar again, and watch as your throw is traced onto the video
 
 ## Limitations
 
-Disk Tracker only works on static videos taken with a tripod (no panning or zooming).
-This software may be lose track of the disk if the background is bright (i.e. the disk's path crosses the sun) or is similar in color to the disk (blue disk against blue sky).
-The disk may not be tracked after hitting the ground
+Disc Tracker only works on static videos taken with a tripod (no panning or zooming).
+This software may be lose track of the disc if the background is bright (i.e. the disc's path crosses the sun) or is similar in color to the disc (blue disc against blue sky).
+The disc may not be tracked after hitting the ground
 
 ### credit
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from image_utils import *
 
 
-class DiskTracker:
+class DiscTracker:
 
     WINDOW_NAME = "Result"
 
@@ -46,6 +46,7 @@ class DiskTracker:
 
     def show_frame(self, frame):
         cv.imshow(self.WINDOW_NAME, frame)
+        cv.waitKey(1)
 
     def save_frame(self, frame):
         self.out_video.write(frame)
@@ -54,9 +55,8 @@ class DiskTracker:
         self.overlay_started = True
         # get ROI from user
         bbox = cv.selectROI("Tracker", frame)
-        inverted_frame = cv.bitwise_not(frame)
         # init background subtraction and tracking
-        fg_mask = self.back_sub.apply(inverted_frame)
+        fg_mask = self.update_background(frame)
         cleaned_mask = clean_mask(fg_mask)
         self.tracker.init(cleaned_mask, bbox)
         cv.destroyWindow("Tracker")

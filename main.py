@@ -1,6 +1,6 @@
 import cv2 as cv
 import sys
-from disk_tracker import DiskTracker
+from disc_tracker import DiscTracker
 
 
 def usage():
@@ -17,7 +17,7 @@ def main():
     # )
     prompt = input("save video? (y/N): ")
     save_video = "y" in prompt
-    dt = DiskTracker(video_filename)
+    dt = DiscTracker(video_filename)
 
     result_frame = None
 
@@ -31,11 +31,9 @@ def main():
         else:
             key = cv.waitKey()
             if key == ord("a"):
-                print("starting overlay")
                 dt.start_overlay(frame)
                 result_frame = dt.process_frame(frame)
             else:
-                print("go to next frame")
                 frame = dt.get_frame()
                 dt.update_background(frame)
                 result_frame = frame

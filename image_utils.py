@@ -94,3 +94,18 @@ def erode_and_dilate(img, kernel=(3, 3)):
     img = cv.erode(img, kernel)
     img = cv.dilate(img, kernel)
     return img
+
+
+def showDistance(bbox, cleaned_mask, frame):
+    lowerb = int(bbox[0])
+    upperb = int(bbox[0] + bbox[2])
+    leftb = int(bbox[1])
+    rightb = int(bbox[1] + bbox[3])
+    cleaned_mask = np.where(cleaned_mask > 254, 1, 0)
+    total = int(np.sum(cleaned_mask[lowerb:upperb, leftb:rightb]))
+    dist = -6 * total + 1400
+    font = cv.FONT_HERSHEY_SIMPLEX
+    cv.putText(
+        frame, str(dist), (lowerb, leftb), font, 1, (255, 255, 255), 1, cv.LINE_AA
+    )
+    return frame

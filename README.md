@@ -26,8 +26,8 @@ $ python main.py video_name.mp4
 ```
 
 2. Press spacebar to move through video frame by frame, until the disc just leaves the throwers hand
-3. Press 'a' key, then use your mouse to draw a rectangle around the disc
-4. Press spacebar again, and watch as your throw is traced onto the video
+3. Press 'a' key, then use your mouse to draw a rectangle around the disc. Try to center the box around the center of the disc. If you are not satisifes with the location of the box, just click and drag to create a new one.
+4. Press enter to confirm your bounding box, then watch as your throw is traced onto the video
 
 ## Limitations
 

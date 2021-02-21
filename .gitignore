@@ -4,3 +4,5 @@ outputs/*
 images/*
 *.avi
 .vscode/
+*.pyc
+__pycache__

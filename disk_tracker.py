@@ -12,11 +12,11 @@ class DiskTracker:
         self.filename = filename
 
         # set up video capture
-        self.cap = cv.VideoCapture(filename)
-        videoWidth = int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH))
-        videoHeight = int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-        frame_rate = self.cap.get(cv.CAP_PROP_FPS)
-        self.frame_count = int(self.cap.get(cv.CAP_PROP_FRAME_COUNT))
+        self.in_video = cv.VideoCapture(filename)
+        videoWidth = int(self.in_video.get(cv.CAP_PROP_FRAME_WIDTH))
+        videoHeight = int(self.in_video.get(cv.CAP_PROP_FRAME_HEIGHT))
+        frame_rate = self.in_video.get(cv.CAP_PROP_FPS)
+        self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
 
         # setup video writer
         fourcc = cv.VideoWriter_fourcc(*"MJPG")
@@ -38,7 +38,7 @@ class DiskTracker:
         cv.destroyAllWindows()
 
     def get_frame(self):
-        ret, frame = self.cap.read()
+        ret, frame = self.in_video.read()
         if not ret:
             print("Error reading video")
             exit()
@@ -46,9 +46,6 @@ class DiskTracker:
 
     def show_frame(self, frame):
         cv.imshow(self.WINDOW_NAME, frame)
-
-    def optional_wait(self):
-        cv.waitKey(1)
 
     def save_frame(self, frame):
         self.out_video.write(frame)

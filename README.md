@@ -2,6 +2,8 @@
 
 Make your own Follow Flights! This project uses OpenCV to trace the location of a disc through its flight path.
 
+<img src="valk_sinsheimer.gif">
+
 ## Installation
 
 1. Clone this repo
